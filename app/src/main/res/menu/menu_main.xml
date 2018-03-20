@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="cc.aoeiuv020.lianproxy.MainActivity">
     <item
+        android:id="@+id/action_switch"
+        android:title="@string/action_switch"
+        app:actionViewClass="android.support.v7.widget.SwitchCompat"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"

@@ -1,16 +1,23 @@
 package cc.aoeiuv020.lianproxy
 
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Intent
+import android.net.VpnService
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.SwitchCompat
 import android.view.Menu
 import android.view.MenuItem
-
+import cc.aoeiuv020.lianproxy.service.LianVpnService
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 
+
 class MainActivity : AppCompatActivity() {
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -21,13 +28,47 @@ class MainActivity : AppCompatActivity() {
                     .setAction("Action", null).show()
         }
 
-        // Example of a call to a native method
-        sample_text.text = stringFromJNI()
+        sample_text.text = "Hello"
+    }
+
+    private fun startVpnService() {
+        LianVpnService.start(this)
+    }
+
+    private fun stopVpnService() {
+        LianVpnService.stop(this)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        when (requestCode) {
+            0 -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    startVpnService()
+                }
+            }
+            else -> super.onActivityResult(requestCode, resultCode, data)
+        }
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
+        val switch = menu.findItem(R.id.action_switch).actionView as SwitchCompat
+        switch.apply {
+            setOnCheckedChangeListener { view, isChecked ->
+                if (isChecked) {
+                    val intent = VpnService.prepare(view.context)
+                    if (intent != null) {
+                        startActivityForResult(intent, 0)
+                    } else {
+                        onActivityResult(0, Activity.RESULT_OK, null)
+                    }
+                } else {
+                    stopVpnService()
+                }
+            }
+        }
         return true
     }
 
@@ -38,20 +79,6 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
-    external fun stringFromJNI(): String
-
-    companion object {
-
-        // Used to load the 'native-lib' library on application startup.
-        init {
-            System.loadLibrary("native-lib")
         }
     }
 }
