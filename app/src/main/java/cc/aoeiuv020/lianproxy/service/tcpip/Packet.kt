@@ -23,4 +23,9 @@ class Packet {
     fun computeTCPChecksum() {
         CommonMethods.ComputeTCPChecksum(ip, tcp)
     }
+
+    fun computeHeaderLength() {
+        tcp.m_Offset = ip.headerLength
+        udp.m_Offset = ip.headerLength
+    }
 }

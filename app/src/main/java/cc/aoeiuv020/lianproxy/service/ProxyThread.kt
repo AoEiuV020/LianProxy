@@ -42,9 +42,10 @@ class ProxyThread(private val service: LianVpnService) : Thread() {
                         when {
                             key.isConnectable -> {
                                 Log.d(TAG, "connect")
-                                val rTunnel = key.attachment() as RemoteTunnel
-                                assert(rTunnel.channel.finishConnect())
-                                Connection(rTunnel).connected()
+                                val tunnel = key.attachment() as RemoteTunnel
+                                assert(tunnel.channel.finishConnect())
+                                Connection(tunnel).connected()
+                                key.cancel()
                             }
                             key.isAcceptable -> {
                                 Log.d(TAG, "accept")
@@ -77,8 +78,7 @@ class ProxyThread(private val service: LianVpnService) : Thread() {
         val session = service.mainThread.sessions[channel.socket().port.toShort()]
                 ?: throw IOException("no session")
         val lTunnel = LocalTunnel(channel)
-        val rTunnel = RemoteTunnel.new()
-        rTunnel.bind(lTunnel)
+        val rTunnel = RemoteTunnel.new(lTunnel)
         assert(service.protect(channel.socket()))
         assert(service.protect(rTunnel.channel.socket()))
         rTunnel.channel.register(selector, SelectionKey.OP_CONNECT, rTunnel)

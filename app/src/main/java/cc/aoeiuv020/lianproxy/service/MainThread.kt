@@ -72,11 +72,14 @@ class MainThread(private val service: LianVpnService) : Thread() {
      * 111.13.101.208:80 -> 172.17.1.1:55555
      * 显然，重要的key在目的端口，拿到session，几个赋值就搞定了，
      * 写进tun设备就能被原app收到了，
+     *
+     * @return 没数据读写的话返回true，线程休息一下，
      */
     private fun onPacketReceived(packet: Packet, len: Int): Boolean {
         if (len <= 0 || packet.ip.sourceIP != localIp) {
             return true
         }
+        packet.computeHeaderLength()
         if (packet.isTcp) {
             println(packet.toString())
             if (packet.tcp.sourcePort == service.proxyThread.port) {

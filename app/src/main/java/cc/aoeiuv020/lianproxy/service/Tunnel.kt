@@ -12,14 +12,16 @@ abstract class Tunnel(val channel: SocketChannel) {
 
 class RemoteTunnel(channel: SocketChannel) : Tunnel(channel) {
     companion object {
-        fun new(): RemoteTunnel {
+        fun new(tunnel: LocalTunnel): RemoteTunnel {
             val channel = SocketChannel.open()
             channel.configureBlocking(false)
-            return RemoteTunnel(channel)
+            return RemoteTunnel(channel).apply {
+                bind(tunnel)
+            }
         }
     }
 
-    fun bind(tunnel: LocalTunnel) {
+    private fun bind(tunnel: LocalTunnel) {
         bindTunnel = tunnel
         tunnel.bindTunnel = this
     }
